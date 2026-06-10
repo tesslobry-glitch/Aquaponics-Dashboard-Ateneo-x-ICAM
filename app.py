@@ -164,29 +164,29 @@ def load_water_data():
 
 def _make_demo_water():
     """Generate realistic synthetic water quality data for demo purposes."""
-    rng = np.random.default_rng(42)
+    np.random.seed(42)
     n = 5000
     t = pd.date_range("2026-01-06", periods=n, freq="1min")
-    hours = t.hour + t.minute / 60
+    hours = np.array(t.hour + t.minute / 60, dtype=float)
     # DO: day-night cycle + noise (raw values ~40-120)
-    do = 80 + 35 * np.sin(np.pi * (hours - 6) / 14) * ((hours > 6) & (hours < 20)).astype(float)
-    do += rng.normal(0, 2, n)
+    do = 80 + 35 * np.sin(np.pi * (hours - 6) / 14) * ((np.array(hours) % 24 > 6) & (np.array(hours) % 24 < 20)).astype(float)
+    do += np.random.normal(0, 2, n)
     # pH: correlated with DO (raw ~455-475)
-    ph = 460 + 8 * np.sin(np.pi * (hours - 6) / 14) * ((hours > 6) & (hours < 20)).astype(float)
-    ph += rng.normal(0, 1.5, n)
+    ph = 460 + 8 * np.sin(np.pi * (hours - 6) / 14) * ((np.array(hours) % 24 > 6) & (np.array(hours) % 24 < 20)).astype(float)
+    ph += np.random.normal(0, 1.5, n)
     # EC: slow variation (raw ~200-225)
-    ec = 211 + 8 * np.sin(2 * np.pi * hours / 24 + 1.2) + rng.normal(0, 2, n)
+    ec = 211 + 8 * np.sin(2 * np.pi * hours / 24 + 1.2) + np.random.normal(0, 2, n)
     # Temp: ~240-255 raw
-    temp = 247 + 3 * np.sin(2 * np.pi * (hours - 6) / 24) + rng.normal(0, 0.5, n)
+    temp = 247 + 3 * np.sin(2 * np.pi * (hours - 6) / 24) + np.random.normal(0, 0.5, n)
     # TDS: correlated with EC
-    tds = 1.254 * ec - 34.8 + rng.normal(0, 4, n)
+    tds = 1.254 * ec - 34.8 + np.random.normal(0, 4, n)
     df = pd.DataFrame({
         "Datetime": t,
-        "MCP_WQ_DO": do.clip(20, 180),
-        "MCP_WQ_EC": ec.clip(170, 260),
-        "MCP_WQ_PH": ph.clip(440, 485),
-        "MCP_WQ_TEMP": temp.clip(235, 260),
-        "MCP_WQ_TDS": tds.clip(170, 310),
+        "MCP_WQ_DO": np.clip(do, 20, 180),
+        "MCP_WQ_EC": np.clip(ec, 170, 260),
+        "MCP_WQ_PH": np.clip(ph, 440, 485),
+        "MCP_WQ_TEMP": np.clip(temp, 235, 260),
+        "MCP_WQ_TDS": np.clip(tds, 170, 310),
     })
     return df
 
